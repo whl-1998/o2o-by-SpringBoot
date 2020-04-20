@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whl.o2o.dao.ProductDao">
+    <resultMap id="productMap" type="com.whl.o2o.entity.Product">
+        <id column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="product_desc" property="productDesc" />
+        <result column="img_addr" property="imgAddr" />
+        <result column="normal_price" property="normalPrice" />
+        <result column="promotion_price" property="promotionPrice" />
+        <result column="priority" property="priority" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="enable_status" property="enableStatus" />
+        <result column="point" property="point" />
+        <association property="productCategory" column="product_category_id" javaType="com.whl.o2o.entity.ProductCategory">
+            <id column="product_category_id" property="productCategoryId" />
+            <result column="product_category_name" property="productCategoryName" />
+        </association>
+        <association property="shop" column="shop_id" javaType="com.whl.o2o.entity.Shop">
+            <id column="shop_id" property="shopId" />
+            <result column="user_id" property="userInfo.userId" />
+            <result column="shop_name" property="shopName" />
+        </association>
+        <collection property="productImgList" column="product_id" ofType="com.whl.o2o.entity.ProductImg">
+            <id column="product_img_id" property="productImgId" />
+            <result column="detail_img" property="imgAddr" />
+            <result column="img_desc" property="imgDesc" />
+            <result column="priority" property="priority" />
+            <result column="create_time" property="createTime" />
+            <result column="product_id" property="productId" />
+        </collection>
+    </resultMap>
+
+    <select id="queryProductList" resultType="com.whl.o2o.entity.Product">
+        select
+            product_id,
+            product_name,
+            product_desc,
+            img_addr,
+            normal_price,
+            promotion_price,
+            priority,
+            point,
+            create_time,
+            update_time,
+            enable_status,
+            product_category_id,
+            shop_id
+        from tb_product
+        <where>
+            <if test="productCondition.shop != null and productCondition.shop.shopId != null">
+                and shop_id = #{productCondition.shop.shopId}
+            </if>
+            <if test="productCondition.productCategory != null and productCondition.productCategory.productCategoryId != null">
+                and product_category_id = #{productCondition.productCategory.productCategoryId}
+            </if>
+            <if test="productCondition.productName != null">
+                and product_name like '%${productCondition.productName}%'
+            </if>
+            <if test="productCondition.enableStatus != null">
+                and enable_status = #{productCondition.enableStatus}
+            </if>
+        </where>
+        order by priority desc limit #{rowIndex}, #{pageSize}
+    </select>
+
+    <select id="queryProductCount" resultType="int">
+        select count(1) from tb_product
+        <where>
+            <if test="productCondition.shop != null and productCondition.shop.shopId != null">
+                and shop_id = #{productCondition.shop.shopId}
+            </if>
+            <if test="productCondition.productCategory != null and productCondition.productCategory.productCategoryId != null">
+                and product_category_id = #{productCondition.productCategory.productCategoryId}
+            </if>
+            <if test="productCondition.productName != null">
+                and product_name like '%${productCondition.productName}%'
+            </if>
+            <if test="productCondition.enableStatus != null">
+                and enable_status = #{productCondition.enableStatus}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertProduct" parameterType="com.whl.o2o.entity.Product" useGeneratedKeys="true" keyProperty="productId" keyColumn="product_id">
+		INSERT INTO tb_product(
+		    product_name,
+		    product_desc,
+		    img_addr,
+		    normal_price,
+		    promotion_price,
+		    priority,
+		    create_time,
+		    update_time,
+		    enable_status,
+		    product_category_id,
+		    point,
+		    shop_id
+		) VALUES (
+		    #{productName},
+		    #{productDesc},
+		    #{imgAddr},
+		    #{normalPrice},
+		    #{promotionPrice},
+		    #{priority},
+		    #{createTime},
+		    #{updateTime},
+		    #{enableStatus},
+		    #{productCategory.productCategoryId},
+		    #{point},
+		    #{shop.shopId}
+		)
+	</insert>
+
+    <update id="updateProduct" parameterType="com.whl.o2o.entity.Product" keyProperty="product_id" useGeneratedKeys="true">
+      update tb_product
+      <set>
+          <if test="productName != null">product_name = #{productName},</if>
+          <if test="productDesc != null">product_desc = #{productDesc},</if>
+          <if test="imgAddr != null">img_addr = #{imgAddr},</if>
+          <if test="normalPrice != null">normal_price = #{normalPrice},</if>
+          <if test="promotionPrice != null">promotion_price = #{promotionPrice},</if>
+          <if test="priority != null">priority = #{priority},</if>
+          <if test="updateTime != null">update_time = #{updateTime},</if>
+          <if test="enableStatus != null">enable_status = #{enableStatus},</if>
+          <if test="point != null">point = #{point},</if>
+          <if test="productCategory != null and productCategory.productCategoryId != null">
+              product_category_id = #{productCategory.productCategoryId},
+          </if>
+      </set>
+        <!-- 根据指定店铺下的指定商品进行更新-->
+      where product_id = #{productId} AND shop_id = #{shop.shopId}
+    </update>
+
+    <select id="queryProductById" parameterType="Long" resultMap="productMap">
+        select
+            product.product_id,
+            product.product_name,
+            product.product_desc,
+            product.img_addr,
+            product.normal_price,
+            product.promotion_price,
+            product.priority,
+            product.point,
+            product.create_time,
+            product.update_time,
+            product.enable_status,
+            product.product_category_id,
+            product.shop_id,
+            productImg.product_img_id,
+            productImg.img_addr AS detail_img,
+            productImg.img_desc,
+            productImg.priority,
+            productImg.create_time
+        from tb_product product LEFT JOIN tb_product_img productImg ON product.product_id
+        where product.product_id = #{productId} Order by productImg.priority DESC
+    </select>
+
+    <update id="updateProductCategoryToNull" parameterType="Long">
+        update tb_product set product_category_id = null where product_category_id = #{productCategoryId}
+    </update>
+
+    <delete id="deleteProduct">
+		DELETE FROM tb_product WHERE product_id = #{productId} AND shop_id=#{shopId}
+	</delete>
+</mapper>

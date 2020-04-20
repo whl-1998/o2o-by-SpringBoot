@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whl.o2o.dao.WeChatAuthDao">
+    <!--WeChatAuth实体类中存在UserInfo的对象 所以这里我们需要创建一个mapper用于获取-->
+    <resultMap id="wechatAuthResultMap" type="com.whl.o2o.entity.WeChatAuth">
+        <id column="wechat_auth_id" property="wechatAuthId"></id>
+        <result column="open_id" property="openId"></result>
+        <result column="create_time" property="createTime"></result>
+        <association column="user_id" property="userInfo" javaType="com.whl.o2o.entity.UserInfo">
+            <id column="user_id" property="userId"></id>
+            <result column="user_name" property="username"></result>
+            <result column="gender" property="gender"></result>
+            <result column="email" property="email"></result>
+            <result column="profile_img" property="profileImg"></result>
+            <result column="create_time" property="createTime"></result>
+            <result column="update_time" property="updateTime"></result>
+            <result column="enable_status" property="enableStatus"></result>
+        </association>
+    </resultMap>
+
+    <select id="queryWeChatInfoByOpenId" resultMap="wechatAuthResultMap" parameterType="String">
+        select
+            w.wechat_auth_id,
+            w.open_id,
+            w.create_time,
+            u.user_id,
+            u.user_name,
+            u.gender,
+            u.email,
+            u.profile_img,
+            u.user_type,
+            u.create_time,
+            u.enable_status
+        from tb_wechat_auth w
+        left join tb_user u on w.user_id = u.user_id
+        where w.open_id = #{openId}
+    </select>
+
+    <insert id="insertWeChatAuth" parameterType="com.whl.o2o.entity.WeChatAuth" useGeneratedKeys="true" keyProperty="wechatAuthId" keyColumn="wechat_auth_id">
+        insert into tb_wechat_auth (
+          user_id,
+          open_id,
+          create_time
+        ) values (
+          #{userInfo.userId},
+          #{openId},
+          #{createTime}
+        );
+    </insert>
+</mapper>
