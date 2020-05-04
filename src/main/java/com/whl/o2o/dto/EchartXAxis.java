@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.HashSet;
 
 /**
- * 迎合echart里的xAxis项
+ * 迎合echart里的x轴
  */
 @Data
 public class EchartXAxis {

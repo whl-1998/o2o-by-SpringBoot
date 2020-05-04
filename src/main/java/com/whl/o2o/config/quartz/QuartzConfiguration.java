@@ -54,7 +54,7 @@ public class QuartzConfiguration {
 		// 绑定jobDetail
 		triggerFactory.setJobDetail(jobDetailFactory.getObject());
 		// 设定cron表达式 也就是每天的晚上12点执行一次订单统计的任务
-		triggerFactory.setCronExpression("0 0 0 * * * * ? *");
+		triggerFactory.setCronExpression("0 0 0 * * ? *");
 		return triggerFactory;
 	}
 

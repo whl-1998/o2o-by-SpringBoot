@@ -39,13 +39,11 @@ $(function() {
             }
             var imgListHtml = '';
             // 遍历商品详情图列表，并生成批量img标签
-            product.productImgList.map(function(item, index) {
+            product.productImgList.map(function(item) {
                 imgListHtml += '<div> <img src="' + getContextPath() + item.imgAddr + '" width="100%" /></div>';
-            });
-            if (data.needQRCode) {
                 // 生成购买商品的二维码供商家扫描
-                imgListHtml += '<div><img>src="/o2o/frontend/generateqrcode4product?productId=' + product.productId + '" width="100%"/></div>';
-            }
+            });
+            imgListHtml += '<div> <img src="/o2o/frontend/generateqrcode4product?productId=' + product.productId + '" width="100%"/></div>';
             $('#imgList').html(imgListHtml);
         }
     });

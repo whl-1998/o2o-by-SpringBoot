@@ -155,7 +155,7 @@
             productImg.img_desc,
             productImg.priority,
             productImg.create_time
-        from tb_product product LEFT JOIN tb_product_img productImg ON product.product_id
+        from tb_product product LEFT JOIN tb_product_img productImg ON product.product_id = productImg.product_id
         where product.product_id = #{productId} Order by productImg.priority DESC
     </select>
 

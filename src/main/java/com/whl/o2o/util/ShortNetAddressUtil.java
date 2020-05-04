@@ -1,130 +1,133 @@
 package com.whl.o2o.util;
 
-import com.google.gson.Gson;
-import com.google.gson.annotations.SerializedName;
-
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
+import java.io.PrintWriter;
 import java.net.URL;
+import java.net.URLConnection;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 //需要在pom.xml引入以下依赖
 /**
+ <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
  <dependency>
-<groupId>com.google.code.gson</groupId>
-<artifactId>gson</artifactId>
-<version>2.8.6</version>
-</dependency>
-**/
+ <groupId>com.alibaba</groupId>
+ <artifactId>fastjson</artifactId>
+ <version>1.2.45</version>
+ </dependency>
+ <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
+ <dependency>
+ <groupId>com.squareup.okhttp3</groupId>
+ <artifactId>okhttp</artifactId>
+ <version>3.9.1</version>
+ </dependency>
+ **/
+/**
+ *
+ * 使用新浪的短链接服务生成短链接
+ *
+ */
+
 public class ShortNetAddressUtil {
-	   final static String CREATE_API = "https://dwz.cn/admin/v2/create";
-	    // 设置Token，在https://dwz.cn/console/userinfo 获取自己的token，复制粘贴到这里
-	    final static String TOKEN = "ab5f6c56951f11388e98d53fc4eebfe9";
-	    
-        class UrlResponse {
-            @SerializedName("Code")
-            private int code;
-    
-            @SerializedName("ErrMsg")
-            private String errMsg;
-    
-            @SerializedName("LongUrl")
-            private String longUrl;
-    
-            @SerializedName("ShortUrl")
-            private String shortUrl;
-    
-            public int getCode() {
-                return code;
-            }
-    
-            public void setCode(int code) {
-                this.code = code;
-            }
-    
-            public String getErrMsg() {
-                return errMsg;
-            }
-    
-            public void setErrMsg(String errMsg) {
-                this.errMsg = errMsg;
-            }
-    
-            public String getLongUrl() {
-                return longUrl;
-            }
-    
-            public void setLongUrl(String longUrl) {
-                this.longUrl = longUrl;
-            }
-    
-            public String getShortUrl() {
+
+    static String actionUrl = "http://api.t.sina.com.cn/short_url/shorten.json";
+
+    static String APPKEY = "2815391962,31641035,3271760578,3925598208";
+
+    public static void main(String[] args) {
+        String longUrl = "https://mp.weixin.qq.com/debug/cgi-bin/sandbox?t=sandbox/login";
+        System.out.println(getShortURL(longUrl));
+    }
+
+    @SuppressWarnings("deprecation")
+    public static String getShortURL(String longUrl) {
+        longUrl = java.net.URLEncoder.encode(longUrl);
+        String appkey = APPKEY;
+        String[] sourceArray = appkey.split(",");
+        for (String key : sourceArray) {
+            String shortUrl = sinaShortUrl(key, longUrl);
+            if (shortUrl != null) {
                 return shortUrl;
             }
-    
-            public void setShortUrl(String shortUrl) {
-                this.shortUrl = shortUrl;
-            }
         }
-    
-        /**
-         * 创建短网址
-         * @param longUrl 长网址：即原网址
-         * @return  成功：短网址
-         *          失败：返回空字符串
-         */
-        public static String getShortURL(String longUrl) {
-            String params = "{\"Url\":\""+ longUrl + "\",\"TermOfValidity\":\""+ "long-term" + "\"}";
-    
-            BufferedReader reader;
+        return null;
+    }
+
+    public static String sinaShortUrl(String source, String longUrl) {
+        String result = sendPost(actionUrl, "url_long=" + longUrl + "&source=" + source);
+        if (result == null || "".equals(result)) {
+            return "";
+        }
+        JSONArray jsonArr = JSON.parseArray(result);
+        JSONObject json = JSON.parseObject(jsonArr.get(0).toString());
+        String ret = json.get("url_short").toString();
+        return ret;
+    }
+
+    /**
+     *
+     * 向指定 URL 发送POST方法的请求
+     *
+     * @param url   发送请求的 URL
+     *
+     * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
+     *
+     * @return 所代表远程资源的响应结果
+     *
+     *
+     *
+     */
+
+    public static String sendPost(String url, String param) {
+        PrintWriter out = null;
+        BufferedReader in = null;
+        String result = "";
+        try {
+            URL realUrl = new URL(url);
+            // 打开和URL之间的连接
+            URLConnection conn = realUrl.openConnection();
+            // 设置通用的请求属性
+            conn.setRequestProperty("accept", "*/*");
+            conn.setRequestProperty("connection", "Keep-Alive");
+            conn.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+            // 发送POST请求必须设置如下两行
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            // 获取URLConnection对象对应的输出流
+            out = new PrintWriter(conn.getOutputStream());
+            // 发送请求参数
+            out.print(param);
+            // flush输出流的缓冲
+            out.flush();
+            // 定义BufferedReader输入流来读取URL的响应
+            in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = in.readLine()) != null) {
+                result += line;
+            }
+        } catch (Exception e) {
+            System.out.println("发送 POST 请求出现异常！" + e);
+            e.printStackTrace();
+        }
+        // 使用finally块来关闭输出流、输入流
+        finally {
             try {
-                // 创建连接
-                URL url = new URL(CREATE_API);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setDoOutput(true);
-                connection.setDoInput(true);
-                connection.setUseCaches(false);
-                connection.setInstanceFollowRedirects(true);
-                connection.setRequestMethod("POST"); // 设置请求方式
-                connection.setRequestProperty("Content-Type", "application/json"); // 设置发送数据的格式
-                connection.setRequestProperty("Token", TOKEN); // 设置发送数据的格式");
-    
-                // 发起请求
-                connection.connect();
-                OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream(), "UTF-8"); // utf-8编码
-                out.append(params);
-                out.flush();
-                out.close();
-    
-                // 读取响应
-                reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-                String line;
-                String res = "";
-                while ((line = reader.readLine()) != null) {
-                    res += line;
+                if (out != null) {
+                    out.close();
                 }
-                reader.close();
-    
-                // 抽取生成短网址
-                UrlResponse urlResponse = new Gson().fromJson(res, UrlResponse.class);
-                if (urlResponse.getCode() == 0) {
-                    return urlResponse.getShortUrl();
-                } else {
-                    System.out.println(urlResponse.getErrMsg());
+                if (in != null) {
+                    in.close();
                 }
-    
-                return ""; // TODO：自定义错误信息
-            } catch (IOException e) {
-                // TODO
-                e.printStackTrace();
             }
-            return ""; // TODO：自定义错误信息
+            catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
-    
-	    public static void main(String[] args) {
-	        String res = getShortURL("https://www.imooc.com/u/index/allcourses");
-	        System.out.println(res);
-	    }
+        return result;
+    }
+
 }
