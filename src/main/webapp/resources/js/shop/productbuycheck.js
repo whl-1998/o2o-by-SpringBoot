@@ -4,8 +4,7 @@ $(function() {
 	getList();
 	function getList() {
 		// 获取用户购买信息的URL
-		var listUrl = '/o2o/shopadmin/listuserproductmapsbyshop?pageIndex=1&pageSize=9999&productName='
-				+ productName;
+		var listUrl = '/o2o/shopadmin/listuserproductmapsbyshop?pageIndex=1&pageSize=9999&productName=' + productName;
 		// 访问后台，获取该店铺的购买信息列表
 		$.getJSON(listUrl, function(data) {
 			if (data.success) {

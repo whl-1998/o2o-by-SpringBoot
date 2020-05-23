@@ -1,18 +1,12 @@
 $(function() {
     var loading = false;
     var maxItems = 20;// 分页允许返回的最大条数，超过此数则禁止访问后台
-
-
     var pageSize = 3;// 默认一页返回的商品数
-
     var listUrl = '/o2o/frontend/listproductsbyshop';// 列出商品列表的URL
-
     var pageNum = 1;// 默认的页码
-
     var shopId = getQueryString('shopId');// 从地址栏里获取ShopId
     var productCategoryId = '';
     var productName = '';
-
     var searchDivUrl = '/o2o/frontend/listshopdetailpageinfo?shopId=' + shopId;// 获取本店铺信息以及商品类别信息列表的URL
 
     getSearchDivData();// 渲染出店铺基本信息以及商品类别列表以供搜索
@@ -59,10 +53,8 @@ $(function() {
         // 访问后台获取相应查询条件下的商品列表
         $.getJSON(url, function(data) {
             if (data.success) {
-
                 maxItems = data.count;// 获取当前查询条件下商品的总数
                 var html = '';
-
                 data.productList.map(function(item) {// 遍历商品列表，拼接出卡片集合
                     html += '' + '<div class="card" data-product-id=' + item.productId + '>'
                         + '<div class="card-header">' + item.productName + '</div>'
@@ -74,13 +66,9 @@ $(function() {
                         + '<p class="color-gray">' + new Date(item.updateTime).Format("yyyy-MM-dd")
                         + '更新</p>' + '<span>点击查看</span>' + '</div>' + '</div>';
                 });
-
                 $('.list-div').append(html);// 将卡片集合添加到目标HTML组件里
-
                 var total = $('.list-div .card').length;// 获取目前为止已显示的卡片总数，包含之前已经加载的
-
                 if (total >= maxItems) {// 若总数达到跟按照此查询条件列出来的总数一致，则停止后台的加载
-
                     $('.infinite-scroll-preloader').hide();// 隐藏提示符
                 } else {
                     $('.infinite-scroll-preloader').show();

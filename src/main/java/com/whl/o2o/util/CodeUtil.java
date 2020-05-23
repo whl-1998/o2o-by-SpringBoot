@@ -45,7 +45,7 @@ public class CodeUtil {
         resp.setDateHeader("Expires", 0);
         resp.setContentType("image/png");
         // 设置图片的文字编码以及内边框距
-        Map<EncodeHintType, Object> hints = new HashMap<EncodeHintType, Object>();
+        Map<EncodeHintType, Object> hints = new HashMap<>();
         hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
         hints.put(EncodeHintType.MARGIN, 0);
         BitMatrix bitMatrix;
@@ -57,5 +57,9 @@ public class CodeUtil {
             return null;
         }
         return bitMatrix;
+    }
+
+    public static void main(String[] args) {
+
     }
 }

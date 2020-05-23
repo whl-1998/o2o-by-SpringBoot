@@ -50,4 +50,12 @@ public class CacheController {
 		cacheService.removeFromCache(shopCategoryService.SHOP_CATEGORY_LIST);
 		return "shop/operationsuccess";
 	}
+
+	@RequestMapping(value = "/clearAll", method = RequestMethod.GET)
+	private String clearAll() {
+		cacheService.removeFromCache(areaService.AREA_LIST_KEY);
+		cacheService.removeFromCache(headLineService.HEAD_LINE_LIST);
+		cacheService.removeFromCache(shopCategoryService.SHOP_CATEGORY_LIST);
+		return "shop/operationsuccess";
+	}
 }

@@ -152,8 +152,9 @@ public class UserProductManagementController {
 		// 获取微信授权信息
 		WeChatAuth auth = getOperatorInfo(request);
 		if (auth != null) {
-			UserInfo operator = auth.getUserInfo();
-			request.getSession().setAttribute("user", operator);
+			UserInfo user = auth.getUserInfo();
+//			UserInfo operator = auth.getUserInfo();
+			request.getSession().setAttribute("user", user);
 			// 获取二维码里state携带的content信息并解码
 			String qrCodeinfo = new String(URLDecoder.decode(HttpServletRequestUtil.getString(request, "state"), "UTF-8"));
 			ObjectMapper mapper = new ObjectMapper();
@@ -165,9 +166,9 @@ public class UserProductManagementController {
 				return "shop/operationfail";
 			}
 			// 校验二维码是否已经过期
-			if (!checkQRCodeInfo(wechatInfo)) {
-				return "shop/operationfail";
-			}
+//			if (!checkQRCodeInfo(wechatInfo)) {
+//				return "shop/operationfail";
+//			}
 			// 获取添加消费记录所需要的参数并组建成userproductmap实例
 			Long productId = wechatInfo.getProductId();
 			Long customerId = wechatInfo.getCustomerId();
@@ -175,9 +176,9 @@ public class UserProductManagementController {
 			// 空值校验
 			if (userProductMap != null && customerId != -1) {
 				try {
-					if (!checkShopAuth(operator.getUserId(), userProductMap)) {
-						return "shop/operationfail";
-					}
+//					if (!checkShopAuth(operator.getUserId(), userProductMap)) {
+//						return "shop/operationfail";
+//					}
 					// 添加消费记录
 					UserProductMapExecution se = userProductMapService.addUserProductMap(userProductMap);
 					if (se.getState() == UserProductMapStateEnum.SUCCESS.getState()) {
@@ -193,7 +194,6 @@ public class UserProductManagementController {
 
 	/**
 	 * 根据code获取UserAccessToken，进而通过token里的openId获取微信用户信息
-	 * 
 	 * @param request
 	 * @return
 	 */
@@ -216,7 +216,6 @@ public class UserProductManagementController {
 
 	/**
 	 * 根据二维码携带的createTime判断其是否超过了10分钟，超过十分钟则认为过期
-	 * 
 	 * @param wechatInfo
 	 * @return
 	 */
@@ -255,7 +254,6 @@ public class UserProductManagementController {
 
 	/**
 	 * 检查扫码的人员是否有操作权限
-	 * 
 	 * @param userId
 	 * @param userProductMap
 	 * @return

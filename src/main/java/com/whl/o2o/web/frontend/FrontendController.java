@@ -57,4 +57,9 @@ public class FrontendController {
     private String showMyPoint() {
         return "frontend/mypoint";
     }
+
+    @RequestMapping(value = "/productcar", method = RequestMethod.GET)
+    private String showProductCar() {
+        return "frontend/productcar";
+    }
 }

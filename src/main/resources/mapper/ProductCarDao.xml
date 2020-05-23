@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whl.o2o.dao.ProductCarDao">
+
+    <resultMap id="productCarMap" type="com.whl.o2o.entity.ProductCar">
+        <id column="product_car_id" property="productCarId" />
+        <result column="status" property="status" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <association property="userInfo" column="user_id" javaType="com.whl.o2o.entity.UserInfo">
+            <id column="user_id" property="userId" />
+            <result column="user_name" property="username" />
+        </association>
+        <association property="product" column="product_id" javaType="com.whl.o2o.entity.Product">
+            <id column="product_id" property="productId" />
+            <result column="product_name" property="productName" />
+        </association>
+    </resultMap>
+
+    <select id="queryProductCarList" resultMap="productCarMap" parameterType="com.whl.o2o.entity.ProductCar">
+		SELECT
+            pc.product_car_id,
+            pc.status,
+            pc.create_time,
+            pc.update_time,
+            u.user_name,
+            u.user_id,
+            p.product_id,
+            p.product_name
+        FROM
+            tb_product_car pc,
+            tb_product p,
+            tb_user u
+        <where>
+            pc.user_id = u.user_id and pc.product_id = p.product_id
+            <if test="productCarCondition.product!=null and productCarCondition.product.productName!=null">
+                and p.product_name like '%${productCarCondition.product.productName}%'
+            </if>
+            <if test="productCarCondition.userInfo!=null and productCarCondition.userInfo.userId!=null">
+                and u.user_id = #{productCarCondition.userInfo.userId}
+            </if>
+        </where>
+        LIMIT #{rowIndex},#{pageSize};
+	</select>
+
+    <insert id="insertProductCar" parameterType="com.whl.o2o.entity.ProductCar" useGeneratedKeys="true" keyProperty="productCarId" keyColumn="product_car_id">
+		INSERT INTO tb_product_car(
+            status,
+			user_id,
+			product_id,
+			create_time,
+			update_time
+		) VALUES (
+			#{status},
+			#{product.productId},
+			#{userInfo.userId},
+			#{createTime},
+			#{updateTime}
+		)
+	</insert>
+
+    <update id="updateProductCar" parameterType="com.whl.o2o.entity.ProductCar">
+        update tb_product_car
+        <set>
+            <if test="status != null">status=#{status},</if>
+            <if test="updateTime != null">update_time=#{updateTime}</if>
+        </set>
+        where product_car_id=#{productCarId}
+    </update>
+
+    <delete id="deleteProductCar" parameterType="Long">
+        delete from tb_product_car
+        where product_car_id = #{productCarId}
+    </delete>
+</mapper>

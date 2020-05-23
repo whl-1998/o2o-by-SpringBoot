@@ -43,8 +43,9 @@ public class ShopServiceImpl implements ShopService {
         if (shop == null || shop.getArea() == null || shop.getUserInfo() == null || shop.getShopCategory() == null) {
             return new ShopExecution(ShopStateEnum.EMPTY);
         }
-        shop.setEnableStatus(1);//enableStatus初始为0表示店铺状态审核中, 这里为了方便设置为1
+//        shop.setEnableStatus(1);//enableStatus初始为0表示店铺状态审核中, 这里为了方便设置为1
         shop.setPriority(0);
+        shop.setEnableStatus(0);//审核中
         shop.setCreateTime(new Date());
         shop.setUpdateTime(new Date());
         shop.setAdvice("审核通过");

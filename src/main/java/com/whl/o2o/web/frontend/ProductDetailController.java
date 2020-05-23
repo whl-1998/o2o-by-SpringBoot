@@ -38,10 +38,10 @@ public class ProductDetailController {
     @RequestMapping(value = "listproductdetailpageinfo", method = RequestMethod.GET)
     @ResponseBody
     private Map<String,Object> listProductDetailPageInfo(HttpServletRequest request) {
-        Map<String, Object> modelMap = new HashMap<String, Object>();
+        Map<String, Object> modelMap = new HashMap<>();
         // 获取前台传递过来的productId
         long productId = HttpServletRequestUtil.getLong(request, "productId");
-        Product product = null;
+        Product product;
         // 空值判断
         if (productId != -1) {
             // 根据productId获取商品信息，包含商品详情图列表
@@ -112,9 +112,9 @@ public class ProductDetailController {
             // 将content的信息先进行base64编码以避免特殊字符造成的干扰，之后拼接目标URL
             String longUrl = urlPrefix + productmapUrl + urlMiddle + URLEncoder.encode(content, "UTF-8") + urlSuffix;
             // 将目标URL转换成短的URL
-            String shortUrl = ShortNetAddressUtil.getShortURL(longUrl);
+            String shortUrl = ShortNetAddressUtil.getShortURL(longUrl); // error
             // 调用二维码生成的工具类方法，传入短的URL，生成二维码
-            BitMatrix qRcodeImg = CodeUtil.generateQRCodeStream(shortUrl, response);
+            BitMatrix qRcodeImg = CodeUtil.generateQRCodeStream(longUrl, response);
             // 将二维码以图片流的形式输出到前端
             MatrixToImageWriter.writeToStream(qRcodeImg, "png", response.getOutputStream());
         }
